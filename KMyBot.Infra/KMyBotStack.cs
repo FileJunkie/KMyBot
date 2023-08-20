@@ -66,6 +66,7 @@ public class KMyBotStack : Stack
             }),
             InlinePolicies = new RoleInlinePolicyArgs
             {
+                Name = "dynamodb-inline-policy",
                 Policy = inlinePolicy,
             },
             ManagedPolicyArns = new[]
