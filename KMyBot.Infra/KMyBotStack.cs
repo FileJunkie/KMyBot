@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Pulumi;
+using Pulumi.Aws.ApiGateway;
+using Pulumi.Aws.ApiGateway.Inputs;
 using Pulumi.Aws.DynamoDB;
 using Pulumi.Aws.DynamoDB.Inputs;
 using Pulumi.Aws.Iam;
@@ -15,16 +17,52 @@ namespace KMyBot.Infra;
 
 public class KMyBotStack : Stack
 {
+    private readonly Config _config = new();
     public KMyBotStack()
     {
+        var domain = CreateCustomDomain();
+        _ = CreateDnsRecord(domain);
         var table = CreateDynamoDbTable();
         var role = CreateRole(table.Arn);
         var function = CreateFunction(role);
         var api = CreateApi(function);
-        Url = api.Url;
+        var apiMapping = CreateApiMapping(domain, api);
+        Url = Output.Create($"https://{_config.DomainName}/");
     }
 
     [Output] public Output<string> Url { get; set; }
+
+    private Aws.ApiGateway.DomainName CreateCustomDomain()
+    {
+        return new ("domainName", new()
+        {
+            CertificateArn = _config.DomainCertificateArn,
+            Domain = _config.DomainName,
+            EndpointConfiguration = new DomainNameEndpointConfigurationArgs
+            {
+                Types = "EDGE",
+            },
+        });
+    }
+
+    private Aws.Route53.Record CreateDnsRecord(Aws.ApiGateway.DomainName domain)
+    {
+        return new ("exampleRecord", new()
+        {
+            Name = domain.Domain,
+            Type = "A",
+            ZoneId = _config.DomainZoneId,
+            Aliases = new[]
+            {
+                new Aws.Route53.Inputs.RecordAliasArgs
+                {
+                    EvaluateTargetHealth = true,
+                    Name = domain.CloudfrontDomainName,
+                    ZoneId = domain.CloudfrontZoneId,
+                },
+            },
+        });
+    }
 
     private Role CreateRole(Output<string> tableArn)
     {
@@ -130,6 +168,16 @@ public class KMyBotStack : Stack
                 Name = "Id",
                 Type = "N",
             }
+        });
+    }
+
+    private BasePathMapping CreateApiMapping(DomainName domain, AwsApiGateway.RestAPI api)
+    {
+        return new("pathMapping", new()
+        {
+            RestApi = api.Api.Apply(a => a.Id),
+            StageName = api.Stage.Apply(s => s.StageName),
+            DomainName = domain.Domain,
         });
     }
 }
