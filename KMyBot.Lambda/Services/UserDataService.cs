@@ -1,8 +1,5 @@
-using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.Model;
-using KMyBot.Lambda.Models;
-using Microsoft.Extensions.Options;
+using KMyBot.Common.Models;
 
 namespace KMyBot.Lambda.Services;
 

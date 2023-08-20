@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using KMyBot.Common.Models;
 using Pulumi;
 using Pulumi.Aws.ApiGateway;
 using Pulumi.Aws.ApiGateway.Inputs;
 using Pulumi.Aws.DynamoDB;
-using Pulumi.Aws.DynamoDB.Inputs;
 using Pulumi.Aws.Iam;
 using Pulumi.Aws.Iam.Inputs;
 using Pulumi.Aws.Lambda;
@@ -22,8 +23,12 @@ public class KMyBotStack : Stack
     {
         var domain = CreateCustomDomain();
         _ = CreateDnsRecord(domain);
-        var table = CreateDynamoDbTable();
-        var role = CreateRole(table.Arn);
+        var tables = new[]
+        {
+            MetaUtils.CreateTable<StateData>(),
+            MetaUtils.CreateTable<UserData>(),
+        };
+        var role = CreateRole(tables);
         var function = CreateFunction(role);
         var api = CreateApi(function);
         var apiMapping = CreateApiMapping(domain, api);
@@ -64,9 +69,10 @@ public class KMyBotStack : Stack
         });
     }
 
-    private Role CreateRole(Output<string> tableArn)
+    private Role CreateRole(Table[] tables)
     {
-        var inlinePolicy = tableArn.Apply(ta => JsonSerializer.Serialize(new Dictionary<string, object?>
+        var tableResourceIds= Output.All(tables.Select(t => t.Arn));
+        var inlinePolicy = tableResourceIds.Apply(ta => JsonSerializer.Serialize(new Dictionary<string, object?>
         {
             ["Version"] = "2012-10-17",
             ["Statement"] = new[]
@@ -117,7 +123,8 @@ public class KMyBotStack : Stack
     {
         return new Function("fn", new()
         {
-            Runtime = Aws.Lambda.Runtime.Dotnet6,
+            Name = "kMyBot",
+            Runtime = Runtime.Dotnet6,
             Handler = "KMyBot.Lambda::KMyBot.Lambda.LambdaEntryPoint::FunctionHandlerAsync",
             Role = role.Arn,
             Code = new FileArchive("../output/KMyBot.Lambda.zip"),
@@ -152,22 +159,6 @@ public class KMyBotStack : Stack
                     EventHandler = fn,
                 },
             },
-        });
-    }
-
-    private Table CreateDynamoDbTable()
-    {
-        return new ("kMyTable", new()
-        {
-            Name = "kMyTable",
-            ReadCapacity = 1,
-            WriteCapacity = 1,
-            HashKey = "Id",
-            Attributes = new TableAttributeArgs
-            {
-                Name = "Id",
-                Type = "N",
-            }
         });
     }
 

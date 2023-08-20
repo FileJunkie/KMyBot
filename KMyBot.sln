@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KMyBot.Infra", "KMyBot.Infra\KMyBot.Infra.csproj", "{604B7E98-CB09-4D7C-87C4-7373C88F0078}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KMyBot.Common", "KMyBot.Common\KMyBot.Common.csproj", "{448A0D66-D6DF-4853-BC07-FDFE44783E7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,5 +30,9 @@ Global
 		{604B7E98-CB09-4D7C-87C4-7373C88F0078}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{604B7E98-CB09-4D7C-87C4-7373C88F0078}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{604B7E98-CB09-4D7C-87C4-7373C88F0078}.Release|Any CPU.Build.0 = Release|Any CPU
+		{448A0D66-D6DF-4853-BC07-FDFE44783E7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{448A0D66-D6DF-4853-BC07-FDFE44783E7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{448A0D66-D6DF-4853-BC07-FDFE44783E7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{448A0D66-D6DF-4853-BC07-FDFE44783E7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
