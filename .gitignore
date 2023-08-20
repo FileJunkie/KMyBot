@@ -1,0 +1,7 @@
+.envrc
+.idea
+.nuke/temp
+output
+bin
+obj
+Pulumi.dev.yaml
