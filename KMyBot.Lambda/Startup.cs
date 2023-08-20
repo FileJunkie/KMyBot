@@ -1,4 +1,5 @@
-﻿using KMyBot.Lambda.Controllers;
+﻿using Amazon.DynamoDBv2;
+using KMyBot.Lambda.Controllers;
 using KMyBot.Lambda.Models;
 using KMyBot.Lambda.Services;
 using Telegram.Bot;
@@ -32,6 +33,8 @@ public class Startup
                 TelegramBotClientOptions options = new(botConfig.BotToken);
                 return new TelegramBotClient(options, httpClient);
             });
+
+        services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
 
         services.AddScoped<UpdateHandlers>();
         services
