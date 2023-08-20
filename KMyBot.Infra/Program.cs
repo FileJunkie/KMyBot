@@ -46,6 +46,7 @@ return await Deployment.RunAsync(() =>
                 ["BOT_SECRET_TOKEN"] = Environment.GetEnvironmentVariable("BOT_SECRET_TOKEN") ?? throw new Exception("BOT_SECRET_TOKEN not defined"),
             }
         },
+        Timeout = 5 * 60,
     });
 
     var api = new AwsApiGateway.RestAPI("api", new()
