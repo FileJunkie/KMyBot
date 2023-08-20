@@ -31,4 +31,14 @@ public class UserDataService
 
         return userData;
     }
+
+    public async Task UpsertUsersStateAsync(long userId, string state, CancellationToken cancellationToken)
+    {
+        await _dynamodbContext.SaveAsync(new StateData
+            {
+                Id = userId,
+                State = state,
+            },
+            cancellationToken);
+    }
 }

@@ -52,7 +52,7 @@ public class KMyBotStack : Stack
 
     private Aws.Route53.Record CreateDnsRecord(Aws.ApiGateway.DomainName domain)
     {
-        return new ("exampleRecord", new()
+        return new ("dnsRecord", new()
         {
             Name = domain.Domain,
             Type = "A",
@@ -121,6 +121,14 @@ public class KMyBotStack : Stack
 
     private Function CreateFunction(Role role)
     {
+        var envVars = new[] { "BOT_TOKEN", "BOT_SECRET_TOKEN", "REDIRECT_URI", "DROPBOX_KEY", "DROPBOX_SECRET" };
+        InputMap<string> variables = new();
+        foreach (var envVar in envVars)
+        {
+            variables[envVar] = Output.CreateSecret(Environment.GetEnvironmentVariable(envVar) ??
+                                                    throw new Exception($"{envVar} not defined"));
+        }
+
         return new Function("fn", new()
         {
             Name = "kMyBot",
@@ -130,11 +138,7 @@ public class KMyBotStack : Stack
             Code = new FileArchive("../output/KMyBot.Lambda.zip"),
             Environment = new FunctionEnvironmentArgs
             {
-                Variables =
-                {
-                    ["BOT_TOKEN"] = Output.CreateSecret(Environment.GetEnvironmentVariable("BOT_TOKEN") ?? throw new Exception("BOT_TOKEN not defined")),
-                    ["BOT_SECRET_TOKEN"] = Output.CreateSecret(Environment.GetEnvironmentVariable("BOT_SECRET_TOKEN") ?? throw new Exception("BOT_SECRET_TOKEN not defined")),
-                }
+                Variables = variables,
             },
             Timeout = 5 * 60,
         });

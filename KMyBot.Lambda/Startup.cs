@@ -26,6 +26,8 @@ public class Startup
     {
         var botConfigurationSection = Configuration.GetSection(BotConfiguration.Configuration);
         services.Configure<BotConfiguration>(botConfigurationSection);
+        var authConfigurationSection = Configuration.GetSection(AuthConfiguration.Configuration);
+        services.Configure<AuthConfiguration>(authConfigurationSection);
 
         services.AddHttpClient("telegram_bot_client")
             .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
@@ -39,6 +41,7 @@ public class Startup
         services.AddScoped<DynamoDBContext>(sp =>
             new DynamoDBContext(sp.GetRequiredService<IAmazonDynamoDB>()));
         services.AddScoped<UserDataService>();
+        services.AddScoped<AuthorizationService>();
 
         services.AddScoped<UpdateHandlers>();
         services
