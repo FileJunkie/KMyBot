@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using KMyBot.Infra;
 using Pulumi;
 using Pulumi.Aws.DynamoDB;
 using Pulumi.Aws.DynamoDB.Inputs;
@@ -25,7 +24,7 @@ public class KMyBotStack : Stack
         Url = api.Url;
     }
 
-    [Output] public Output<string> Url { get; set; }  
+    [Output] public Output<string> Url { get; set; }
 
     private Role CreateRole(Output<string> tableArn)
     {
@@ -78,7 +77,7 @@ public class KMyBotStack : Stack
 
     private Function CreateFunction(Role role)
     {
-        return new Aws.Lambda.Function("fn", new()
+        return new Function("fn", new()
         {
             Runtime = Aws.Lambda.Runtime.Dotnet6,
             Handler = "KMyBot.Lambda::KMyBot.Lambda.LambdaEntryPoint::FunctionHandlerAsync",
@@ -122,13 +121,14 @@ public class KMyBotStack : Stack
     {
         return new ("kMyTable", new()
         {
+            Name = "kMyTable",
             ReadCapacity = 1,
             WriteCapacity = 1,
             HashKey = "Id",
             Attributes = new TableAttributeArgs
             {
                 Name = "Id",
-                Type = "S",
+                Type = "N",
             }
         });
     }

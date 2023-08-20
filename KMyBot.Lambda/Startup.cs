@@ -1,4 +1,5 @@
 ﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using KMyBot.Lambda.Controllers;
 using KMyBot.Lambda.Models;
 using KMyBot.Lambda.Services;
@@ -35,6 +36,9 @@ public class Startup
             });
 
         services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
+        services.AddScoped<DynamoDBContext>(sp =>
+            new DynamoDBContext(sp.GetRequiredService<IAmazonDynamoDB>()));
+        services.AddScoped<UserDataService>();
 
         services.AddScoped<UpdateHandlers>();
         services
