@@ -42,8 +42,8 @@ return await Deployment.RunAsync(() =>
         {
             Variables =
             {
-                ["BOT_TOKEN"] = Environment.GetEnvironmentVariable("BOT_TOKEN") ?? throw new Exception("BOT_TOKEN not defined"),
-                ["BOT_SECRET_TOKEN"] = Environment.GetEnvironmentVariable("BOT_SECRET_TOKEN") ?? throw new Exception("BOT_SECRET_TOKEN not defined"),
+                ["BOT_TOKEN"] = Output.CreateSecret(Environment.GetEnvironmentVariable("BOT_TOKEN") ?? throw new Exception("BOT_TOKEN not defined")),
+                ["BOT_SECRET_TOKEN"] = Output.CreateSecret(Environment.GetEnvironmentVariable("BOT_SECRET_TOKEN") ?? throw new Exception("BOT_SECRET_TOKEN not defined")),
             }
         },
         Timeout = 5 * 60,
