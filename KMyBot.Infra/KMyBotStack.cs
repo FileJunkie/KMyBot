@@ -152,14 +152,14 @@ public class KMyBotStack : Stack
             {
                 new AwsApiGateway.Inputs.RouteArgs
                 {
-                    Path = "/",
-                    Method = AwsApiGateway.Method.GET,
+                    Path = "/api/bot",
+                    Method = AwsApiGateway.Method.POST,
                     EventHandler = fn,
                 },
                 new AwsApiGateway.Inputs.RouteArgs
                 {
-                    Path = "/api/bot",
-                    Method = AwsApiGateway.Method.POST,
+                    Path = "/api/auth",
+                    Method = AwsApiGateway.Method.GET,
                     EventHandler = fn,
                 },
             },

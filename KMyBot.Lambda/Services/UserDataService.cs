@@ -41,4 +41,19 @@ public class UserDataService
             },
             cancellationToken);
     }
+
+    public async Task SaveRefreshTokenAsync(string state, string refreshToken, CancellationToken cancellationToken)
+    {
+        var stateData = await _dynamodbContext.LoadAsync<StateData>(state, cancellationToken);
+        if (stateData == null)
+        {
+            throw new Exception("No user for this state");
+        }
+
+        await _dynamodbContext.SaveAsync(new UserData
+        {
+            Id = stateData.Id,
+            RefreshToken = refreshToken,
+        }, cancellationToken);
+    }
 }

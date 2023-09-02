@@ -78,7 +78,7 @@ public class UpdateHandlers
     {
         await _botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
-            text: $"Oh hi, I now you, your id is {message.From!.Id}!",
+            text: $"Oh hi, I know you, your id is {message.From!.Id}!",
             cancellationToken: cancellationToken);
     }
 
