@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var refreshToken = await _authorizationService.GetRefreshTokenAsync(code);
+            var refreshToken = await _authorizationService.GetRefreshTokenAsync(code, cancellationToken);
             await _userDataService.SaveRefreshTokenAsync(state, refreshToken, cancellationToken);
         }
         catch (Exception e)

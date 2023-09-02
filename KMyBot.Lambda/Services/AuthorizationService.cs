@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using KMyBot.Lambda.Models;
 using Microsoft.Extensions.Options;
 
@@ -42,7 +41,7 @@ public class AuthorizationService
             .Select(s => s[RandomNumberGenerator.GetInt32(s.Length)]).ToArray());
     }
 
-    public async Task<string> GetRefreshTokenAsync(string code)
+    public async Task<string> GetRefreshTokenAsync(string code, CancellationToken ct)
     {
         var request = new FormUrlEncodedContent(new Dictionary<string, string>
         {
@@ -53,8 +52,8 @@ public class AuthorizationService
             ["redirect_uri"] = _authConfiguration.RedirectUri,
         });
 
-        var response = await _httpClient.PostAsync("/oauth2/token", request);
-        var result = await response.Content.ReadAsStringAsync();
+        var response = await _httpClient.PostAsync("/oauth2/token", request, ct);
+        var result = await response.Content.ReadAsStringAsync(ct);
         if (!response.IsSuccessStatusCode)
         {
             Console.Error.WriteLine("{0}", result);
@@ -63,5 +62,27 @@ public class AuthorizationService
 
         var parsed = JsonSerializer.Deserialize<IDictionary<string, object>>(result);
         return parsed?["refresh_token"]?.ToString() ?? throw new Exception("Why is it null?");
+    }
+
+    public async Task<string> GetTokenForRefreshTokenAsync(string refreshToken, CancellationToken ct)
+    {
+        var request = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["refresh_token"] = refreshToken,
+            ["grant_type"] = "refresh_token",
+            ["client_id"] = _authConfiguration.ClientId,
+            ["client_secret"] = _authConfiguration.ClientSecret,
+        });
+
+        var response = await _httpClient.PostAsync("/oauth2/token", request, ct);
+        var result = await response.Content.ReadAsStringAsync(ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.Error.WriteLine("{0}", result);
+            throw new Exception(result);
+        }
+
+        var parsed = JsonSerializer.Deserialize<IDictionary<string, object>>(result);
+        return parsed?["access_token"]?.ToString() ?? throw new Exception("Why is it null?");
     }
 }
