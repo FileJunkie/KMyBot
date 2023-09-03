@@ -56,7 +56,6 @@ public class AuthorizationService
         var result = await response.Content.ReadAsStringAsync(ct);
         if (!response.IsSuccessStatusCode)
         {
-            Console.Error.WriteLine("{0}", result);
             throw new Exception(result);
         }
 

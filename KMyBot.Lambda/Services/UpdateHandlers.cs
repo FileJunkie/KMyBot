@@ -1,4 +1,4 @@
-using Amazon.DynamoDBv2;
+using Dropbox.Api;
 using KMyBot.Common.Models;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -76,9 +76,13 @@ public class UpdateHandlers
 
     private async Task ProcessExistingUserAsync(Message message, UserData userData, CancellationToken cancellationToken)
     {
+        var accessToken =
+            await _authorizationService.GetTokenForRefreshTokenAsync(userData.RefreshToken!, cancellationToken);
+        using var dropboxClient = new DropboxClient(accessToken);
+        var currentAccount = await dropboxClient.Users.GetCurrentAccountAsync();
         await _botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
-            text: $"Oh hi, I know you, your id is {message.From!.Id}!",
+            text: $"Oh hi, I know you, your name is {currentAccount.Name.DisplayName}!",
             cancellationToken: cancellationToken);
     }
 
