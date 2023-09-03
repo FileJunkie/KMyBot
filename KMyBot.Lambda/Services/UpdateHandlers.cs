@@ -1,4 +1,5 @@
 using Dropbox.Api;
+using Dropbox.Api.Files;
 using KMyBot.Common.Models;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -83,6 +84,21 @@ public class UpdateHandlers
         await _botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: $"Oh hi, I know you, your name is {currentAccount.Name.DisplayName}!",
+            cancellationToken: cancellationToken);
+
+        var files = await dropboxClient.Files.SearchV2Async(new(
+            query: "kmy",
+            options: new(
+                filenameOnly: true,
+                fileExtensions: new[] { "kmy" })));
+        var fileNames = files
+            .Matches
+            .Select(m => (m.Metadata.AsMetadata.Value as FileMetadata)?.Name)
+            .Where(fn => !string.IsNullOrWhiteSpace(fn))
+            .Select(fn => fn!);
+        await _botClient.SendTextMessageAsync(
+            chatId: message.Chat.Id,
+            text: "Found following files:\n" + string.Join('\n', fileNames),
             cancellationToken: cancellationToken);
     }
 
