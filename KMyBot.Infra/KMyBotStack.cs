@@ -37,7 +37,7 @@ public class KMyBotStack : Stack
 
     [Output] public Output<string> Url { get; set; }
 
-    private Aws.ApiGateway.DomainName CreateCustomDomain()
+    private DomainName CreateCustomDomain()
     {
         return new ("domainName", new()
         {
