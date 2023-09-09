@@ -10,4 +10,7 @@ public class UserData
 
     [DynamoDBProperty]
     public string? RefreshToken { get; set; }
+
+    [DynamoDBProperty]
+    public string? SelectedFile { get; set; }
 }

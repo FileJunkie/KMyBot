@@ -42,6 +42,11 @@ public class UserDataService
             cancellationToken);
     }
 
+    public async Task UpdateUserAsync(UserData userData, CancellationToken cancellationToken)
+    {
+        await _dynamodbContext.SaveAsync(userData, cancellationToken);
+    }
+
     public async Task SaveRefreshTokenAsync(string state, string refreshToken, CancellationToken cancellationToken)
     {
         var stateData = await _dynamodbContext.LoadAsync<StateData>(state, cancellationToken);

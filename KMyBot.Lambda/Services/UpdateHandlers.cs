@@ -4,6 +4,7 @@ using KMyBot.Common.Models;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace KMyBot.Lambda.Services;
 
@@ -86,20 +87,45 @@ public class UpdateHandlers
             text: $"Oh hi, I know you, your name is {currentAccount.Name.DisplayName}!",
             cancellationToken: cancellationToken);
 
-        var files = await dropboxClient.Files.SearchV2Async(new(
-            query: "kmy",
-            options: new(
-                filenameOnly: true,
-                fileExtensions: new[] { "kmy" })));
-        var fileNames = files
-            .Matches
-            .Select(m => (m.Metadata.AsMetadata.Value as FileMetadata)?.Name)
-            .Where(fn => !string.IsNullOrWhiteSpace(fn))
-            .Select(fn => fn!);
-        await _botClient.SendTextMessageAsync(
-            chatId: message.Chat.Id,
-            text: "Found following files:\n" + string.Join('\n', fileNames),
-            cancellationToken: cancellationToken);
+        if (string.IsNullOrWhiteSpace(userData.SelectedFile))
+        {
+            var files = await dropboxClient.Files.SearchV2Async(new(
+                query: "kmy",
+                options: new(
+                    filenameOnly: true,
+                    fileExtensions: new[] { "kmy" })));
+            var fileNames = files
+                .Matches
+                .Select(m => (m.Metadata.AsMetadata.Value as FileMetadata)?.Name)
+                .Where(fn => !string.IsNullOrWhiteSpace(fn))
+                .Select(fn => fn!)
+                .ToList();
+            if (!string.IsNullOrWhiteSpace(message.Text) && fileNames.Contains(message.Text))
+            {
+                userData.SelectedFile = message.Text;
+                await _userDataService.UpdateUserAsync(userData, cancellationToken);
+                await _botClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: "File selection saved",
+                    replyMarkup: new ReplyKeyboardRemove(),
+                    cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await _botClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: "Found following files",
+                    replyMarkup: new ReplyKeyboardMarkup(fileNames.Select(fn => new KeyboardButton(fn))),
+                    cancellationToken: cancellationToken);
+            }
+        }
+        else
+        {
+            await _botClient.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: $"You chose file {userData.SelectedFile}",
+                cancellationToken: cancellationToken);
+        }
     }
 
     private Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
