@@ -12,4 +12,8 @@
 		<PackageReference Include="Pulumi.AwsApiGateway" Version="1.*" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\KMyBot.Common\KMyBot.Common.csproj" />
+	</ItemGroup>
+
 </Project>

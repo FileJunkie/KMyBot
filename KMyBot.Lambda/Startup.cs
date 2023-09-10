@@ -1,4 +1,6 @@
-﻿using KMyBot.Lambda.Controllers;
+﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using KMyBot.Lambda.Controllers;
 using KMyBot.Lambda.Models;
 using KMyBot.Lambda.Services;
 using Telegram.Bot;
@@ -24,6 +26,8 @@ public class Startup
     {
         var botConfigurationSection = Configuration.GetSection(BotConfiguration.Configuration);
         services.Configure<BotConfiguration>(botConfigurationSection);
+        var authConfigurationSection = Configuration.GetSection(AuthConfiguration.Configuration);
+        services.Configure<AuthConfiguration>(authConfigurationSection);
 
         services.AddHttpClient("telegram_bot_client")
             .AddTypedClient<ITelegramBotClient>((httpClient, sp) =>
@@ -32,6 +36,12 @@ public class Startup
                 TelegramBotClientOptions options = new(botConfig.BotToken);
                 return new TelegramBotClient(options, httpClient);
             });
+
+        services.AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
+        services.AddScoped<DynamoDBContext>(sp =>
+            new DynamoDBContext(sp.GetRequiredService<IAmazonDynamoDB>()));
+        services.AddScoped<UserDataService>();
+        services.AddScoped<AuthorizationService>();
 
         services.AddScoped<UpdateHandlers>();
         services

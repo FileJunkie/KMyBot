@@ -13,8 +13,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="8.1.0" />
+    <PackageReference Include="Dropbox.Api" Version="6.37.0" />
     <PackageReference Include="EnvSettings" Version="3.0.0" />
     <PackageReference Include="Telegram.Bot" Version="19.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.21" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KMyBot.Common\KMyBot.Common.csproj" />
   </ItemGroup>
 </Project>

@@ -56,7 +56,7 @@ class Build : NukeBuild
         .Requires(() => BotSecretToken)
         .Executes(async () =>
         {
-            var mainUri = new Uri(GetPulumiOutput("url"));
+            var mainUri = new Uri(GetPulumiOutput("Url"));
             Log.Information("Setting main URI is {MainUri}", mainUri);
             var webhookAddress = new Uri(mainUri, "./api/bot");
             Log.Information("Setting webhook URI to {WebhookUri}", webhookAddress);
