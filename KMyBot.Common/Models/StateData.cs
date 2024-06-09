@@ -6,8 +6,8 @@ namespace KMyBot.Common.Models;
 public class StateData
 {
     [DynamoDBHashKey]
-    public string State { get; set; } = default!;
+    public required string State { get; set; }
 
     [DynamoDBProperty]
-    public long Id { get; set; } = default!;
+    public required long Id { get; set; }
 }

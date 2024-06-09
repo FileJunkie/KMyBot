@@ -4,7 +4,7 @@ public class AuthConfiguration
 {
     public static readonly string Configuration = nameof(AuthConfiguration);
 
-    public string RedirectUri { get; set; } = default!;
-    public string ClientId { get; set; } = default!;
-    public string ClientSecret { get; set; } = default!;
+    public required string RedirectUri { get; set; }
+    public required string ClientId { get; set; }
+    public required string ClientSecret { get; set; }
 }

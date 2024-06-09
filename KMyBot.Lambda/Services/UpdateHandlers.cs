@@ -8,21 +8,12 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace KMyBot.Lambda.Services;
 
-public class UpdateHandlers
+public class UpdateHandlers(
+    ITelegramBotClient botClient,
+    ILogger<UpdateHandlers> logger,
+    UserDataService userDataService,
+    AuthorizationService authorizationService)
 {
-    private readonly ITelegramBotClient _botClient;
-    private readonly ILogger<UpdateHandlers> _logger;
-    private readonly UserDataService _userDataService;
-    private readonly AuthorizationService _authorizationService;
-
-    public UpdateHandlers(ITelegramBotClient botClient, ILogger<UpdateHandlers> logger, UserDataService userDataService, AuthorizationService authorizationService)
-    {
-        _botClient = botClient;
-        _logger = logger;
-        _userDataService = userDataService;
-        _authorizationService = authorizationService;
-    }
-
     public Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
     {
         var errorMessage = exception switch
@@ -31,7 +22,7 @@ public class UpdateHandlers
             _                                       => exception.ToString()
         };
 
-        _logger.LogInformation("HandleError: {ErrorMessage}", errorMessage);
+        logger.LogInformation("HandleError: {ErrorMessage}", errorMessage);
         return Task.CompletedTask;
     }
 
@@ -48,14 +39,14 @@ public class UpdateHandlers
 
     private async Task BotOnMessageReceived(Message message, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Receive message type: {MessageType}", message.Type);
+        logger.LogInformation("Receive message type: {MessageType}", message.Type);
 
         if (message.From == null)
         {
             return;
         }
 
-        var userData = await _userDataService.GetOrCreateUserAsync(message.From.Id, cancellationToken);
+        var userData = await userDataService.GetOrCreateUserAsync(message.From.Id, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(userData.RefreshToken))
         {
@@ -69,8 +60,8 @@ public class UpdateHandlers
 
     private async Task ProcessNewUserAsync(Message message, UserData userData, CancellationToken cancellationToken)
     {
-        var url = await _authorizationService.CreateStateAndRedirectAsync(message.From!.Id, cancellationToken);
-        await _botClient.SendTextMessageAsync(
+        var url = await authorizationService.CreateStateAndRedirectAsync(message.From!.Id, cancellationToken);
+        await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: $"Hey {message.From!.Id}, I don't know you. Go here please: {url}",
             cancellationToken: cancellationToken);
@@ -79,10 +70,10 @@ public class UpdateHandlers
     private async Task ProcessExistingUserAsync(Message message, UserData userData, CancellationToken cancellationToken)
     {
         var accessToken =
-            await _authorizationService.GetTokenForRefreshTokenAsync(userData.RefreshToken!, cancellationToken);
+            await authorizationService.GetTokenForRefreshTokenAsync(userData.RefreshToken!, cancellationToken);
         using var dropboxClient = new DropboxClient(accessToken);
         var currentAccount = await dropboxClient.Users.GetCurrentAccountAsync();
-        await _botClient.SendTextMessageAsync(
+        await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: $"Oh hi, I know you, your name is {currentAccount.Name.DisplayName}!",
             cancellationToken: cancellationToken);
@@ -103,8 +94,8 @@ public class UpdateHandlers
             if (!string.IsNullOrWhiteSpace(message.Text) && fileNames.Contains(message.Text))
             {
                 userData.SelectedFile = message.Text;
-                await _userDataService.UpdateUserAsync(userData, cancellationToken);
-                await _botClient.SendTextMessageAsync(
+                await userDataService.UpdateUserAsync(userData, cancellationToken);
+                await botClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: "File selection saved",
                     replyMarkup: new ReplyKeyboardRemove(),
@@ -112,7 +103,7 @@ public class UpdateHandlers
             }
             else
             {
-                await _botClient.SendTextMessageAsync(
+                await botClient.SendTextMessageAsync(
                     chatId: message.Chat.Id,
                     text: "Found following files",
                     replyMarkup: new ReplyKeyboardMarkup(fileNames.Select(fn => new KeyboardButton(fn))),
@@ -121,7 +112,7 @@ public class UpdateHandlers
         }
         else
         {
-            await _botClient.SendTextMessageAsync(
+            await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: $"You chose file {userData.SelectedFile}",
                 cancellationToken: cancellationToken);
@@ -130,7 +121,7 @@ public class UpdateHandlers
 
     private Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Unknown update type: {UpdateType}", update.Type);
+        logger.LogInformation("Unknown update type: {UpdateType}", update.Type);
         return Task.CompletedTask;
     }
 }

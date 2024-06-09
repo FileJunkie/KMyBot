@@ -1,5 +1,3 @@
-using Pulumi;
-
 namespace KMyBot.Infra;
 
 public class Config

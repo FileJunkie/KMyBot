@@ -5,26 +5,19 @@ using Microsoft.Extensions.Options;
 
 namespace KMyBot.Lambda.Services;
 
-public class AuthorizationService
+public class AuthorizationService(IOptions<AuthConfiguration> authConfiguration, UserDataService userDataService)
 {
-    private readonly AuthConfiguration _authConfiguration;
-    private readonly UserDataService _userDataService;
-    private readonly HttpClient _httpClient;
+    private readonly AuthConfiguration _authConfiguration = authConfiguration.Value;
 
-    public AuthorizationService(IOptions<AuthConfiguration> authConfiguration, UserDataService userDataService)
+    private readonly HttpClient _httpClient = new()
     {
-        _authConfiguration = authConfiguration.Value;
-        _userDataService = userDataService;
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri("https://api.dropbox.com/"),
-        };
-    }
+        BaseAddress = new Uri("https://api.dropbox.com/"),
+    };
 
     public async Task<string> CreateStateAndRedirectAsync(long userId, CancellationToken cancellationToken)
     {
         var state = RandomString(24);
-        await _userDataService.UpsertUsersStateAsync(userId, state, cancellationToken);
+        await userDataService.UpsertUsersStateAsync(userId, state, cancellationToken);
 
         return $"https://www.dropbox.com/oauth2/authorize?" +
                $"client_id={_authConfiguration.ClientId}" +
