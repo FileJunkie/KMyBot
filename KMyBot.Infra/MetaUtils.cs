@@ -8,12 +8,12 @@ namespace KMyBot.Infra;
 
 public static class MetaUtils
 {
-    private static readonly Type[] NumericTypes = new[]
-    {
+    private static readonly Type[] NumericTypes =
+    [
         typeof(int),
         typeof(long),
         typeof(double),
-    };
+    ];
 
     public static Pulumi.Aws.DynamoDB.Table CreateTable<T>()
     {

@@ -31,7 +31,7 @@ public class KMyBotStack : Stack
         var role = CreateRole(tables);
         var function = CreateFunction(role);
         var api = CreateApi(function);
-        var apiMapping = CreateApiMapping(domain, api);
+        _ = CreateApiMapping(domain, api);
         Url = Output.Create($"https://{_config.DomainName}/");
     }
 
@@ -50,7 +50,7 @@ public class KMyBotStack : Stack
         });
     }
 
-    private Aws.Route53.Record CreateDnsRecord(Aws.ApiGateway.DomainName domain)
+    private Aws.Route53.Record CreateDnsRecord(DomainName domain)
     {
         return new ("dnsRecord", new()
         {

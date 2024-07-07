@@ -10,13 +10,8 @@ namespace KMyBot.Lambda.Filters;
 /// Read more: <see href="https://core.telegram.org/bots/api#setwebhook"/> "secret_token"
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class ValidateTelegramBotAttribute : TypeFilterAttribute
+public sealed class ValidateTelegramBotAttribute() : TypeFilterAttribute(typeof(ValidateTelegramBotFilter))
 {
-    public ValidateTelegramBotAttribute()
-        : base(typeof(ValidateTelegramBotFilter))
-    {
-    }
-
     private class ValidateTelegramBotFilter : IActionFilter
     {
         private readonly string _secretToken;

@@ -6,7 +6,7 @@ namespace KMyBot.Common.Models;
 public class UserData
 {
     [DynamoDBHashKey]
-    public long Id { get; set; }
+    public required long Id { get; set; }
 
     [DynamoDBProperty]
     public string? RefreshToken { get; set; }
